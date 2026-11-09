@@ -75,7 +75,7 @@ export function TtsVoicePicker(props: {
       ? serviceWithLibrary.listVoiceDesigns!().catch(() => null)
       : Promise.resolve(null);
 
-    const builtinEdgeVoices: CreatorTtsVoice[] = hasVoiceLibrary ? [
+    const builtinEdgeVoices: CreatorTtsVoice[] = (hasVoiceLibrary && props.provider === 'edge-tts') ? [
       {
         id: 'km-KH-SreymomNeural',
         name: 'Sreymom (ស្រីមុំ)',
@@ -100,7 +100,7 @@ export function TtsVoicePicker(props: {
     ] : [];
 
     void Promise.all([
-      hasVoiceLibrary ? ttsPromise.catch(cause => ({ voices: [] as CreatorTtsVoice[], _error: cause })) : ttsPromise,
+      (hasVoiceLibrary && props.provider === 'edge-tts') ? ttsPromise.catch(cause => ({ voices: [] as CreatorTtsVoice[], _error: cause })) : ttsPromise,
       libPromise
     ])
       .then(([response, libResult]) => {
@@ -118,6 +118,10 @@ export function TtsVoicePicker(props: {
         const extraBuiltins = builtinEdgeVoices.filter(v => !existingIds.has(v.id));
         const merged = [...response.voices, ...extraBuiltins, ...libraryVoices.filter(v => !existingIds.has(v.id))];
         setVoices(merged);
+        const currentSelected = merged.find(v => v.id === props.value);
+        if (currentSelected) {
+          onVoiceResolvedRef.current?.(currentSelected);
+        }
         if ('_error' in response && merged.length === 0) {
           pageIssues.captureOperationFailure(
             'tts.load-voices',

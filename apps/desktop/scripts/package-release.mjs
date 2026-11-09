@@ -594,20 +594,37 @@ function listRelativeFiles(root, current = root) {
   return files;
 }
 
-function gitOutput(args) {
-  const result = spawnSync('git', args, {
-    cwd: rootDir,
-    encoding: 'utf8',
-    timeout: 10_000,
-    maxBuffer: 2 * 1024 * 1024
-  });
-  if (result.error) throw result.error;
-  if (result.status !== 0) {
-    throw new Error(
-      `Git command failed (${args.join(' ')}): ${result.stderr.trim()}`
-    );
+function readGitFallback(args) {
+  if (process.env.VISHNUCREATOR_GIT_COMMIT && args[0] === 'rev-parse') {
+    return process.env.VISHNUCREATOR_GIT_COMMIT;
   }
-  return result.stdout.trim();
+  const headPath = join(rootDir, '.git', 'HEAD');
+  if (existsSync(headPath)) {
+    const head = readFileSync(headPath, 'utf8').trim();
+    if (head.startsWith('ref: ')) {
+      const refFile = join(rootDir, '.git', head.slice(5).trim());
+      if (existsSync(refFile)) return readFileSync(refFile, 'utf8').trim();
+    }
+    return head;
+  }
+  return '';
+}
+
+function gitOutput(args) {
+  try {
+    const result = spawnSync('git', args, {
+      cwd: rootDir,
+      encoding: 'utf8',
+      timeout: 10_000,
+      maxBuffer: 2 * 1024 * 1024
+    });
+    if (result.error || result.status !== 0) {
+      return readGitFallback(args);
+    }
+    return result.stdout.trim();
+  } catch {
+    return readGitFallback(args);
+  }
 }
 
 function hasValue(value) {

@@ -194,8 +194,8 @@ describe('KhmerVoicesView', () => {
   });
 
   it('plays sample audio using previewTtsVoice for Edge-TTS voices', async () => {
-    const playSpy = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
-    const pauseSpy = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    const playSpy = vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue(undefined);
+    const pauseSpy = vi.spyOn(HTMLAudioElement.prototype, 'pause').mockImplementation(() => {});
     const createUrl = vi.fn(() => 'blob:test-edge-audio');
     const revokeUrl = vi.fn();
     Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createUrl });

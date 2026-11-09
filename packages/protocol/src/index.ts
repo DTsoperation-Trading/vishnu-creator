@@ -21,3 +21,4 @@ export * from './platform-connections.js';
 export * from './creator-languages.js';
 export * from './subtitle-render.js';
 export * from './dub-models.js';
+export * from './ai-video-studio.js';

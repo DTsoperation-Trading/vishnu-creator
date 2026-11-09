@@ -134,7 +134,8 @@ export default function SmartDubbingWorkspace(props: {
       .then(response => {
         if (!active) return;
         const configuredProvider = response.config.tts.provider;
-        const selectedProvider = readProvider(session?.state.ttsProvider) ?? configuredProvider;
+        const savedProvider = readProvider(session?.state.ttsProvider);
+        const selectedProvider = savedProvider ?? configuredProvider;
         setProvider(selectedProvider);
         const hasexplicitVoiceInState = session?.state !== undefined && 'voiceCode' in session.state;
         const savedVoice = readString(session?.state.voiceCode);
@@ -148,9 +149,10 @@ export default function SmartDubbingWorkspace(props: {
           return;
         }
         const selectedConfig = response.config.tts[selectedProvider];
-        setModel(readString(session?.state.ttsModel) || selectedConfig.model);
-        const defaultVoice = selectedConfig.defaultVoiceId || (!hasexplicitVoiceInState ? 'km-KH-SreymomNeural' : '');
-        const defaultName = selectedConfig.defaultVoiceId || (!hasexplicitVoiceInState ? 'Sreymom' : '');
+        const savedModel = savedProvider === selectedProvider ? readString(session?.state.ttsModel) : '';
+        setModel(savedModel || selectedConfig?.model || '');
+        const defaultVoice = selectedConfig?.defaultVoiceId || (!hasexplicitVoiceInState ? 'km-KH-SreymomNeural' : '');
+        const defaultName = selectedConfig?.defaultVoiceId || (!hasexplicitVoiceInState ? 'Sreymom' : '');
         setVoice(savedVoice || defaultVoice);
         setVoiceName(prev => savedVoiceName || prev || defaultName);
       })

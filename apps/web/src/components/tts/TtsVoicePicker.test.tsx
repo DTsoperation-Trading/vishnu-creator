@@ -156,7 +156,7 @@ describe('TtsVoicePicker', () => {
       configurable: true,
       value: vi.fn()
     });
-    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    const play = vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
     const tts = createService();
 
@@ -191,7 +191,7 @@ describe('TtsVoicePicker', () => {
   it.each(['select', 'library'] as const)('only lists stored preview languages in %s and ignores stale audio after switching languages', async presentation => {
     Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:language-preview') });
     Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
-    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    const play = vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
     const tts = createService();
     const pending: Array<(response: Response) => void> = [];
@@ -243,7 +243,7 @@ describe('TtsVoicePicker', () => {
   it('filters voices by the outer preview language without changing an existing voice or falling back to another language', async () => {
     Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:voice-language') });
     Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
-    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue();
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
     const tts = createService();
     const onChange = vi.fn();
@@ -458,7 +458,7 @@ describe('TtsVoicePicker', () => {
     const revokeUrl = vi.fn();
     Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createUrl });
     Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeUrl });
-    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    const play = vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
     const tts = createService();
     const pending: Array<(response: Response) => void> = [];

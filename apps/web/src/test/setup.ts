@@ -3,8 +3,74 @@ import 'fake-indexeddb/auto';
 import { configure } from '@testing-library/react';
 import { appLanguageOptions } from '../i18n/language.js';
 import { loadLanguageCatalog } from '../i18n/translated-copy.js';
+import { beforeEach } from 'vitest';
 
 configure({ asyncUtilTimeout: 5000 });
+
+// Polyfill HTMLMediaElement methods not implemented in jsdom
+// jsdom throws "Not implemented" for play/pause on audio/video elements
+// Define them on HTMLMediaElement.prototype so tests can mock/spy on them
+// and they will be inherited by both HTMLAudioElement and HTMLVideoElement
+
+// State for media elements
+let mediaCurrentTime = 0;
+let mediaPlaybackRate = 1;
+let mediaMuted = false;
+let videoDuration = NaN;
+
+if (typeof HTMLMediaElement !== 'undefined') {
+  // play/pause - make writable so tests can spy
+  Object.defineProperty(HTMLMediaElement.prototype, 'play', {
+    configurable: true,
+    writable: true,
+    value: function() { return Promise.resolve(); }
+  });
+
+  Object.defineProperty(HTMLMediaElement.prototype, 'pause', {
+    configurable: true,
+    writable: true,
+    value: function() { }
+  });
+
+  // currentTime
+  Object.defineProperty(HTMLMediaElement.prototype, 'currentTime', {
+    configurable: true,
+    get() { return mediaCurrentTime; },
+    set(v) { mediaCurrentTime = v; }
+  });
+
+  // playbackRate
+  Object.defineProperty(HTMLMediaElement.prototype, 'playbackRate', {
+    configurable: true,
+    get() { return mediaPlaybackRate; },
+    set(v) { mediaPlaybackRate = v; }
+  });
+
+  // muted
+  Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+    configurable: true,
+    get() { return mediaMuted; },
+    set(v) { mediaMuted = v; }
+  });
+}
+
+// Video-specific properties
+if (typeof HTMLVideoElement !== 'undefined') {
+  // duration - video only
+  Object.defineProperty(HTMLVideoElement.prototype, 'duration', {
+    configurable: true,
+    get() { return videoDuration; },
+    set(v) { videoDuration = v; }
+  });
+}
+
+// Reset media element state between tests
+beforeEach(() => {
+  mediaCurrentTime = 0;
+  mediaPlaybackRate = 1;
+  mediaMuted = false;
+  videoDuration = NaN;
+});
 
 // Component tests exercise initialized copy; cold loading is covered separately.
 await Promise.all(appLanguageOptions.map(({ value }) => loadLanguageCatalog(value)));

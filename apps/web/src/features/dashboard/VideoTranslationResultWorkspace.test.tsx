@@ -60,7 +60,7 @@ function EditingHarness(props: { preview?: boolean; readOnly?: boolean; saving?:
 
 describe('VideoTranslationResultWorkspace', () => {
   it('previews the completed video without autoplay and returns to the source when editing settings or subtitles', () => {
-    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    const play = vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
     const props = { ...baseProps, workbench: true, immersive: true, subtitleAutosave: true,
       editorSettings: { style: <input aria-label="测试字号" />, voice: <span>配音</span>, disabled: false, onOpen: vi.fn() },
@@ -351,7 +351,7 @@ describe('VideoTranslationResultWorkspace', () => {
   });
 
   it('synchronizes generated dubbing with the video and restores its original audio on exit', async () => {
-    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    const play = vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
     try {
       const props = { ...baseProps, activeTab: 'subtitles' as const, immersive: true,
@@ -380,8 +380,8 @@ describe('VideoTranslationResultWorkspace', () => {
 
   it('keeps dubbing selected when pausing intentionally aborts a pending play request', async () => {
     let rejectPlay!: (error: Error) => void;
-    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => new Promise((_, reject) => { rejectPlay = reject; }));
-    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    const play = vi.spyOn(HTMLAudioElement.prototype, 'play').mockImplementation(() => new Promise((_, reject) => { rejectPlay = reject; }));
+    const pause = vi.spyOn(HTMLVideoElement.prototype, 'pause').mockImplementation(() => {});
     try {
       const { unmount } = render(<VideoTranslationResultWorkspace {...baseProps} activeTab="subtitles" immersive
         editorSettings={{ style: null, voice: null, disabled: false, onOpen: vi.fn() }}

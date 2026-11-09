@@ -1773,8 +1773,8 @@ describe('DashboardPage', () => {
       configurable: true,
       value: vi.fn()
     });
-    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
-    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+    const play = vi.spyOn(HTMLAudioElement.prototype, 'play').mockResolvedValue();
+    const pause = vi.spyOn(HTMLAudioElement.prototype, 'pause').mockImplementation(() => undefined);
     const tts = createTtsServices({ voiceId: 'nova', voiceName: '星语' });
     const creatorService = createInMemoryCreatorService();
     const applyAction = vi.spyOn(creatorService, 'applyAction');

@@ -139,6 +139,7 @@ Full task lists with status and evidence are in [`docs/tasks/`](../tasks/README.
 | 6 | [Extra creator studios](../tasks/phase-6-creator-studios.md) | 5 | ≈4 days | each enabled studio has an e2e test producing a real file. |
 | 7 | [Release](../tasks/phase-7-release.md) | 7 | ≈3 days | installer works on a clean Windows PC; Khmer dub end-to-end without manual setup. |
 | 8 | [More AI providers (free, paid, cloud, local)](../tasks/phase-8-ai-providers.md) | 10 | ≈2–3 weeks | every provider listed in Settings has a recorded real call (cloud) or local run, and the user guide matches the app. |
+| 9 | [AI Video Studio — One-Click Generation](../tasks/phase-9-ai-video-studio.md) | 12 | ≈8–10 weeks | E2E: Topic → Storyline → Characters → Assets → Voice → Assembly → MP4 (2-min Khmer folktale). Dual-track (Pipeline + Canvas), Asset Library, Vishnu Director Agent. |
 
 ---
 
@@ -151,6 +152,8 @@ Full task lists with status and evidence are in [`docs/tasks/`](../tasks/README.
 | 3 | Phase 3 finish + Phase 4 |
 | 4 | Phase 5 (cloning/design on CPU; LoRA training needs a GPU machine) |
 | 5 | Phase 6 + Phase 7 |
+| 6–7 | Phase 8 (AI providers live verification) |
+| 8–17 | Phase 9 (AI Video Studio — Foundation, Storyline, Characters, Assets, Voice, Assembly, Dual-Track Workspace, Settings, Polish) |
 
 ---
 
@@ -180,6 +183,7 @@ Full task lists with status and evidence are in [`docs/tasks/`](../tasks/README.
 4. Khmer UI locale available; Khmer text renders correctly in preview and burn-in.
 5. All checks green: `pnpm typecheck`, `pnpm test`, `pytest`, `pnpm e2e`, desktop installer smoke test.
 6. All reused code reviewed, rebranded, attributed, and owned in this repo — nothing runs from `reference/`.
+7. **AI Video Studio**: Enter a topic → get a complete Khmer video (storyline, characters, visuals, voice, assembly) with dual-track Pipeline/Canvas, Asset Library, and Vishnu Director Agent. Resumable at each stage. Cost estimate before generation.
 
 ---
 
