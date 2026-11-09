@@ -25,12 +25,14 @@ import { createAssetLibrary, type AssetLibrary } from './asset-library.js';
 import { createStageCheckpointManager, type StageCheckpointManager, AI_VIDEO_STUDIO_PHASE_ORDER } from './stage-checkpoint.js';
 import { createModelGatewayClient, type ModelGatewayClient } from './model-gateway.js';
 import { createVisualStyleExtractor, type VisualStyleExtractor } from './visual-style-extractor.js';
+import { createStorylineGenerator, type StorylineGenerator } from './storyline-generator.js';
 
 export interface VishnuDirectorAgentOptions {
   assetLibrary?: AssetLibrary;
   checkpointManager?: StageCheckpointManager;
   modelGateway?: ModelGatewayClient;
   styleExtractor?: VisualStyleExtractor;
+  storylineGenerator?: StorylineGenerator;
   storageDir?: string;
 }
 
@@ -41,6 +43,7 @@ export function createVishnuDirectorAgent(options: VishnuDirectorAgentOptions = 
   const checkpointManager = options.checkpointManager || createStageCheckpointManager();
   const modelGateway = options.modelGateway || createModelGatewayClient();
   const styleExtractor = options.styleExtractor || createVisualStyleExtractor();
+  const storylineGenerator = options.storylineGenerator || createStorylineGenerator({ modelGateway, styleExtractor });
   const visualStyleCache = new Map<string, VisualStyleReference>();
   const jobStates = new Map<string, AIVideoStudioJobState>();
 
@@ -105,152 +108,13 @@ export function createVishnuDirectorAgent(options: VishnuDirectorAgentOptions = 
     context: VishnuDirectorRequest['context']
   ): Promise<VishnuDirectorResponse> {
     try {
-      const { topic, style = 'animation', targetLanguage = 'km', culturalContext = 'khmer' } = input;
-      const resolvedStyle = styleExtractor.resolveStyleParams(style);
-
-      const systemPrompt = `You are an expert Khmer cinematic storyteller and scriptwriter.
-Generate a structured, culturally authentic narrative in JSON format for the topic: "${topic}".
-Language requirements: Target is "${targetLanguage}". User-facing dialogue in Khmer must be natural spoken Khmer without synthetic spaces and with correct '។' punctuation.
-Aesthetic style: ${resolvedStyle.khmerAesthetic || 'traditional'} Khmer aesthetic (${resolvedStyle.mood} mood, ${resolvedStyle.lighting} lighting).
-
-Output JSON schema strictly conforming to:
-{
-  "outline": {
-    "acts": [
-      {
-        "actNumber": 1,
-        "title": "Act title",
-        "summary": "Summary",
-        "beats": [
-          { "beatNumber": 1, "title": "Beat", "description": "Desc", "emotionalArc": "setup", "estimatedDurationSeconds": 30 }
-        ]
-      }
-    ],
-    "totalEstimatedDurationSeconds": 60
-  },
-  "characterBible": [
-    {
-      "id": "char-1",
-      "name": "Character Name",
-      "role": "protagonist",
-      "archetype": "Hero",
-      "personality": ["brave", "humble"],
-      "motivation": "Protect the village",
-      "conflict": "Overcoming the drought",
-      "arc": "positive",
-      "voiceTraits": ["warm", "resonant"],
-      "visualTraits": { "ageRange": "25-30", "gender": "male", "ethnicity": "Khmer", "distinctiveFeatures": ["traditional krama", "kind eyes"] },
-      "relationships": []
-    }
-  ],
-  "script": [
-    {
-      "sceneNumber": 1,
-      "actNumber": 1,
-      "beatNumber": 1,
-      "location": "Ancient Pagoda Courtyard",
-      "timeOfDay": "golden-hour",
-      "characters": ["char-1"],
-      "action": "Standing quietly under the banyan tree as the monks chant.",
-      "dialogue": [
-        { "characterId": "char-1", "text": "ទឹកដីនេះជាកេរ្តិ៍ដំណែលរបស់ដូនតា។", "emotion": "neutral" }
-      ],
-      "cameraNotes": "Wide shot slowly pushing in to medium close-up",
-      "estimatedDurationSeconds": 15,
-      "visualReferences": []
-    }
-  ],
-  "culturalNotes": ["Authentic depiction of rural Cambodian life and respectful pagoda etiquette."]
-}`;
-
-      let storylineOutput: StorylineOutput;
-      try {
-        const response = await modelGateway.chatCompletion({
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Create storyline for: "${topic}"` },
-          ],
-          temperature: 0.7,
-        });
-
-        const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]) as Partial<StorylineOutput>;
-          storylineOutput = {
-            outline: parsed.outline || {
-              acts: [{
-                actNumber: 1,
-                title: 'Beginning',
-                summary: 'Introduction',
-                beats: [{ beatNumber: 1, title: 'Opening', description: topic, emotionalArc: 'setup', estimatedDurationSeconds: 30 }],
-              }],
-              totalEstimatedDurationSeconds: 30,
-            },
-            characterBible: parsed.characterBible || [],
-            script: parsed.script || [],
-            visualStyleParams: resolvedStyle,
-            culturalNotes: parsed.culturalNotes || [],
-          };
-        } else {
-          throw new Error('No JSON object found in LLM response');
-        }
-      } catch (err) {
-        // Safe, deterministic fallback for offline / test environments
-        storylineOutput = {
-          outline: {
-            acts: [{
-              actNumber: 1,
-              title: 'ដំណើរដើមទង (The Beginning)',
-              summary: `Folktale introducing ${topic}`,
-              beats: [{
-                beatNumber: 1,
-                title: 'ការបើកឆាក (Opening)',
-                description: `Introduction to ${topic}`,
-                emotionalArc: 'setup',
-                estimatedDurationSeconds: 30,
-              }],
-            }],
-            totalEstimatedDurationSeconds: 60,
-          },
-          characterBible: [
-            {
-              id: 'char-protagonist',
-              name: 'សុផល (Sophal)',
-              role: 'protagonist',
-              archetype: 'Wise Explorer',
-              personality: ['kind', 'determined'],
-              motivation: 'Seek peace and wisdom',
-              conflict: 'Overcoming adversity',
-              arc: 'positive',
-              voiceTraits: ['warm', 'narrative'],
-              visualTraits: { ageRange: '20s', gender: 'male', ethnicity: 'Khmer', distinctiveFeatures: ['silk krama'] },
-              relationships: [],
-            },
-          ],
-          script: [
-            {
-              sceneNumber: 1,
-              actNumber: 1,
-              beatNumber: 1,
-              location: 'វត្តអារាមបុរាណ (Ancient Pagoda)',
-              timeOfDay: 'morning',
-              characters: ['char-protagonist'],
-              action: 'Sophal walks toward the temple gate.',
-              dialogue: [{ characterId: 'char-protagonist', text: 'ថ្ងៃថ្មីបានមកដល់ហើយ។', emotion: 'neutral' }],
-              cameraNotes: 'Establishing wide crane shot',
-              estimatedDurationSeconds: 15,
-              visualReferences: [],
-            },
-          ],
-          visualStyleParams: resolvedStyle,
-          culturalNotes: ['Traditional Khmer setting with respectful cultural portrayal'],
-        };
-      }
+      const storylineOutput = await storylineGenerator.generate(input);
+      const resolvedStyle = storylineOutput.visualStyleParams;
 
       // Initialize project asset library
       const library = getAssetLibrary(context.projectId);
       const styleAsset = library.createVisualStyle({
-        name: `${style} Aesthetic`,
+        name: `${input.style || 'animation'} Aesthetic`,
         description: 'Visual style for project',
         tags: ['style', resolvedStyle.khmerAesthetic || 'traditional'],
         thumbnailUrl: null,

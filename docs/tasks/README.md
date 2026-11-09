@@ -14,7 +14,7 @@ The master plan explains *why*; these files track *what is done*.
 | 6 | [Extra creator studios](phase-6-creator-studios.md) | 9 | 9 | 0 | 0 | 0 | Phase 3 | met (E2E real file verified) | Complete |
 | 7 | [Release](phase-7-release.md) | 7 | 7 | 0 | 0 | 0 | Phases 1–6 | met (`v1.0.0-khmer` + packaged E2E verified) | Complete |
 | 8 | [More AI providers (free, paid, cloud, local)](phase-8-ai-providers.md) | 11 | 6 | 5 | 0 | 0 | Phase 3 | — | In progress — see [Remaining work](phase-8-ai-providers.md#remaining-work-and-what-to-fix-2026-10-30) |
-| 9 | [AI Video Studio — One-Click Generation](phase-9-ai-video-studio.md) | 12 | 1 | 0 | 0 | 11 | Phase 8 | — | In progress (T9.1 Done) |
+| 9 | [AI Video Studio — One-Click Generation](phase-9-ai-video-studio.md) | 12 | 2 | 0 | 0 | 10 | Phase 8 | — | In progress (T9.1, T9.2 Done) |
 
 ## Audit 2026-10-27
 
