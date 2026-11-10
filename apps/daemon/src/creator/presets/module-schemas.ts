@@ -123,6 +123,23 @@ const smartDubbingLocaleSchema = z.object({
   text: z.string().max(5000).optional()
 }).strict();
 
+const aiVideoStudioDefaultsSchema = z.object({
+  topic: z.string().max(500).default(''),
+  style: z.enum(['animation', 'live-action', 'documentary', 'shorts', 'cinematic']).default('animation'),
+  targetLanguage: z.string().min(2).max(32).default('km'),
+  targetDurationSeconds: z.number().int().min(15).max(1800).default(120),
+  culturalContext: z.enum(['khmer', 'universal', 'custom']).default('khmer'),
+  customCulturalRules: z.string().max(1000).optional()
+}).strict();
+
+const aiVideoStudioLocaleSchema = z.object({
+  topic: z.string().max(500).optional(),
+  style: z.enum(['animation', 'live-action', 'documentary', 'shorts', 'cinematic']).optional(),
+  targetLanguage: z.string().min(2).max(32).optional(),
+  targetDurationSeconds: z.number().int().min(15).max(1800).optional(),
+  culturalContext: z.enum(['khmer', 'universal', 'custom']).optional()
+}).strict();
+
 const emptyLocaleSchema = z.object({}).strict();
 
 const bindingByModule: Record<CreatorRuntimeWorkspace, { id: string; version: number }> = {
@@ -131,7 +148,8 @@ const bindingByModule: Record<CreatorRuntimeWorkspace, { id: string; version: nu
   'image-generation': { id: 'image-generation', version: 2 },
   'video-generation': { id: 'video-generation', version: 1 },
   'cover-generator': { id: 'cover', version: 2 },
-  'smart-dubbing': { id: 'smart-dubbing', version: 1 }
+  'smart-dubbing': { id: 'smart-dubbing', version: 1 },
+  'ai-video-studio': { id: 'ai-video-studio', version: 1 }
 };
 
 export const creatorPresetModuleDefinitions: readonly CreatorPresetModuleDefinition[] = [
@@ -143,7 +161,8 @@ export const creatorPresetModuleDefinitions: readonly CreatorPresetModuleDefinit
     ...state,
     sourceType: 'prompt'
   })),
-  createDefinition('smart-dubbing', smartDubbingDefaultsSchema, smartDubbingLocaleSchema)
+  createDefinition('smart-dubbing', smartDubbingDefaultsSchema, smartDubbingLocaleSchema),
+  createDefinition('ai-video-studio', aiVideoStudioDefaultsSchema, emptyLocaleSchema)
 ];
 
 export function getCreatorPresetModuleDefinition(

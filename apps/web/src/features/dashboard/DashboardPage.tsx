@@ -198,6 +198,15 @@ const creatorTools: DashboardEntry[] = [
     workspace: 'smart-dubbing'
   },
   {
+    title: 'AI视频工作室',
+    description: '一句话生成完整视频：脚本、角色、画面、配音、合成',
+    prompt: '帮我把这个主题变成一个完整的AI视频，从剧本、角色设计、画面生成、配音合成到最终成片，全自动完成。',
+    category: '视频创作',
+    icon: WandSparkles,
+    badge: 'NEW',
+    workspace: 'ai-video-studio'
+  },
+  {
     title: '数字人口播',
     description: '快速制作专业口播',
     prompt: '帮我制作一支数字人口播视频，请先优化文案，再规划人物、声音和画面。',
@@ -214,7 +223,8 @@ const recommendedTabWorkspaces = new Set<CreatorWorkspace>([
   'video-translation',
   'video-generation',
   'image-generation',
-  'smart-dubbing'
+  'smart-dubbing',
+  'ai-video-studio'
 ]);
 
 const CREATOR_JOB_CREATE_ATTEMPT_TIMEOUT_MS = 4_000;

@@ -33,7 +33,8 @@ export function createCreatorPresetDetails(
     'image-generation': [['尺寸', 'Size'], ['质量', 'Quality'], ['数量', 'Count']],
     'video-generation': [['尺寸', 'Size'], ['时长', 'Duration']],
     'cover-generator': [['风格', 'Style'], ['比例', 'Aspect ratio'], ['文字语言', 'Text language'], ['数量', 'Count']],
-    'smart-dubbing': [['风格', 'Style'], ['语速', 'Speed'], ['格式', 'Format']]
+    'smart-dubbing': [['风格', 'Style'], ['语速', 'Speed'], ['格式', 'Format']],
+    'ai-video-studio': [['主题', 'Topic'], ['风格', 'Style'], ['语言', 'Language'], ['时长', 'Duration']]
   };
   const details = createCreatorPresetHighlights(preset, locale).map((highlight, index) => {
     const [zh, en] = labels[preset.module][index] ?? ['配置', 'Setting'];
@@ -180,6 +181,12 @@ const highlightBuilders: Record<
     textHighlight(dubbingStyleLabel(readString(defaults.style), locale)),
     textHighlight(`${formatSpeed(readNumber(defaults.speed))}x`),
     textHighlight((readString(defaults.format) ?? 'mp3').toUpperCase())
+  ],
+  'ai-video-studio': (defaults, locale) => [
+    textHighlight(readString(defaults.topic) ?? localize(locale, '未指定', 'Not specified')),
+    textHighlight(dubbingStyleLabel(readString(defaults.style), locale)),
+    textHighlight(languageLabel(readString(defaults.targetLanguage), locale)),
+    textHighlight(`${readNumber(defaults.targetDurationSeconds) ?? 120} ${localize(locale, '秒', 'sec')}`)
   ]
 };
 

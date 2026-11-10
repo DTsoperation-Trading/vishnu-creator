@@ -10,7 +10,8 @@ describe('creator protocol contract', () => {
       'image-generation',
       'video-generation',
       'cover-generator',
-      'smart-dubbing'
+      'smart-dubbing',
+      'ai-video-studio'
     ]);
   });
 

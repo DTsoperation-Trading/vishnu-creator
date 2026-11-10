@@ -1,6 +1,120 @@
 import type { CreatorJson, CreatorActor, CreatorStageRunStatus } from './creator.js';
 
 /**
+ * Vishnu Director Agent Interface
+ */
+export interface VishnuDirectorAgent {
+  planWorkflow(request: VishnuDirectorRequest): Promise<VishnuDirectorResponse>;
+  executeStage(request: VishnuDirectorRequest): Promise<VishnuDirectorResponse>;
+  buildCanvasGraph(request: VishnuDirectorRequest): Promise<VishnuDirectorResponse>;
+  extractVisualStyle(request: VishnuDirectorRequest): Promise<VishnuDirectorResponse>;
+  manageAssetLibrary(request: VishnuDirectorRequest): Promise<VishnuDirectorResponse>;
+  resumeFromCheckpoint(request: VishnuDirectorRequest): Promise<VishnuDirectorResponse>;
+  regenerateStage(request: VishnuDirectorRequest): Promise<VishnuDirectorResponse>;
+}
+
+/**
+ * Model Gateway Client Interface (DramaClaw RelayClaw pattern)
+ */
+export interface ModelGatewayClient {
+  generateText(params: {
+    provider: string;
+    model: string;
+    messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+    temperature?: number;
+    maxTokens?: number;
+    jsonMode?: boolean;
+  }): Promise<{ content: string; usage?: { promptTokens: number; completionTokens: number }; costUSD?: number }>;
+
+  generateImage(params: {
+    provider: string;
+    model: string;
+    prompt: string;
+    size: string;
+    quality?: string;
+    n?: number;
+  }): Promise<Array<{ url: string; revisedPrompt?: string; costUSD?: number }>>;
+
+  generateVideo(params: {
+    provider: string;
+    model: string;
+    prompt: string;
+    image?: string;
+    duration?: number;
+    size?: string;
+  }): Promise<{ url: string; costUSD?: number; jobId?: string }>;
+
+  generateAudio(params: {
+    provider: string;
+    model: string;
+    text: string;
+    voice: string;
+    speed?: number;
+    pitch?: number;
+  }): Promise<{ url: string; duration: number; costUSD?: number }>;
+
+  getModels(provider: string): Promise<Array<{ id: string; type: string; capabilities: string[] }>>;
+
+  estimateCost(params: {
+    provider: string;
+    model: string;
+    operation: 'text' | 'image' | 'video' | 'audio';
+    estimatedCalls: number;
+  }): Promise<{ estimatedCostUSD: number }>;
+}
+
+/**
+ * Character Bible Entry from Storyline Generator
+ */
+export interface CharacterBibleEntry {
+  id: string;
+  name: string;
+  role: 'protagonist' | 'antagonist' | 'supporting' | 'narrator' | 'extra';
+  archetype: string;
+  personality: string[];
+  motivation: string;
+  conflict: string;
+  arc: 'positive' | 'negative' | 'flat' | 'corruption' | 'redemption';
+  voiceTraits: string[];
+  visualTraits: {
+    ageRange: string;
+    gender: string;
+    ethnicity: string;
+    distinctiveFeatures: string[];
+  };
+  relationships: Array<{
+    targetCharacterId: string;
+    type: 'ally' | 'enemy' | 'mentor' | 'romantic' | 'family' | 'rival';
+    dynamic: string;
+  }>;
+}
+
+/**
+ * Voice Profile Assignment Helper
+ */
+export interface VoiceProfileAssignment {
+  characterId: string;
+  voiceAssetId: string;
+  voiceProfile: VoiceAsset['metadata'];
+}
+
+/**
+ * Stage Checkpoint Manager
+ */
+export interface StageCheckpointManager {
+  saveCheckpoint(stage: AIVideoStudioPhase, data: Record<string, CreatorJson>): Promise<void>;
+  loadCheckpoint(stage: AIVideoStudioPhase): Promise<Record<string, CreatorJson> | null>;
+  hasCheckpoint(stage: AIVideoStudioPhase): Promise<boolean>;
+  clearCheckpoint(stage: AIVideoStudioPhase): Promise<void>;
+  listCheckpoints(): Promise<AIVideoStudioPhase[]>;
+}
+
+/**
+ * Voice Profile Assignment Function Type
+ */
+export type AssignVoiceProfile = (character: CharacterBibleEntry, providerPreference: string) => Promise<VoiceProfileAssignment>;
+
+/**
  * Phase 9: AI Video Studio Protocol Types
  * Dual-track architecture: Pipeline (structured) + Canvas (free exploration)
  * Inspired by DramaClaw's XiaHua + Series architecture
@@ -150,6 +264,11 @@ export type PropAsset = AssetLibraryItem & {
   };
 };
 
+/**
+ * Voice Asset Metadata type alias for external use
+ */
+export type VoiceAssetMetadata = VoiceAsset['metadata'];
+
 export type MusicAsset = AssetLibraryItem & {
   type: 'music';
   metadata: {
@@ -240,6 +359,26 @@ export type StorylineInput = {
   customCulturalRules?: string;
 };
 
+export type ScriptScene = {
+  sceneNumber: number;
+  actNumber: number;
+  beatNumber: number;
+  location: string;
+  timeOfDay: string;
+  characters: string[];
+  action: string;
+  dialogue: Array<{
+    characterId: string;
+    text: string;
+    emotion: 'neutral' | 'happy' | 'sad' | 'angry' | 'fearful' | 'surprised' | 'whisper' | 'shouting';
+    subtext?: string;
+  }>;
+  cameraNotes: string;
+  estimatedDurationSeconds: number;
+  visualReferences: string[];
+  startTimeMs?: number;
+};
+
 export type StorylineOutput = {
   outline: {
     acts: Array<{
@@ -265,7 +404,7 @@ export type StorylineOutput = {
     motivation: string;
     conflict: string;
     arc: 'positive' | 'negative' | 'flat' | 'corruption' | 'redemption';
-    voiceTraits: string[];             // 'warm', 'authoritative', 'playful', etc.
+    voiceTraits: string[];
     visualTraits: {
       ageRange: string;
       gender: string;
@@ -278,24 +417,7 @@ export type StorylineOutput = {
       dynamic: string;
     }>;
   }>;
-  script: Array<{
-    sceneNumber: number;
-    actNumber: number;
-    beatNumber: number;
-    location: string;
-    timeOfDay: string;
-    characters: string[];              // Character IDs present
-    action: string;
-    dialogue: Array<{
-      characterId: string;
-      text: string;
-      emotion: 'neutral' | 'happy' | 'sad' | 'angry' | 'fearful' | 'surprised' | 'whisper' | 'shouting';
-      subtext?: string;
-    }>;
-    cameraNotes: string;
-    estimatedDurationSeconds: number;
-    visualReferences: string[];        // Visual style / mood board refs
-  }>;
+  script: ScriptScene[];
   visualStyleParams: VisualStyleParams;
   culturalNotes: string[];
 };

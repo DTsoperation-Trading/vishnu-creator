@@ -127,7 +127,8 @@ export const creatorRuntimeWorkspaces = [
   'image-generation',
   'video-generation',
   'cover-generator',
-  'smart-dubbing'
+  'smart-dubbing',
+  'ai-video-studio'
 ] as const;
 
 export type CreatorRuntimeWorkspace = typeof creatorRuntimeWorkspaces[number];
